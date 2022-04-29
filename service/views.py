@@ -5,6 +5,7 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -40,12 +41,19 @@ class PlanDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class VendorList(APIView):
+class VendorList(APIView, LimitOffsetPagination):
 
     def get(self, request, format=None):
-        snippets = Vendor.objects.all()
-        serializer = VendorSerializer(snippets, many=True)
-        return Response(serializer.data)
+
+        vendors = Vendor.objects.all()
+
+        result_page = self.paginate_queryset(vendors, request, view=self)
+
+        serializer = VendorSerializer(result_page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+
 
     def post(self, request, format=None):
         if isinstance(request.data, list):
