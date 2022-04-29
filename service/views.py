@@ -43,6 +43,9 @@ class PlanDetail(APIView):
 
 class VendorList(APIView, LimitOffsetPagination):
 
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, format=None):
 
         vendors = Vendor.objects.all()
@@ -52,8 +55,6 @@ class VendorList(APIView, LimitOffsetPagination):
         serializer = VendorSerializer(result_page, many=True)
 
         return self.get_paginated_response(serializer.data)
-
-
 
     def post(self, request, format=None):
         if isinstance(request.data, list):
